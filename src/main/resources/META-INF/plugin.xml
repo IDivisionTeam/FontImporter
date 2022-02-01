@@ -1,0 +1,43 @@
+<idea-plugin>
+    <id>team.uptech.fontimporter.FontImporter</id>
+    <name>Font Importer</name>
+    <vendor email="yaroslav.ovdiienko@uptech.team" url="http://www.uptech.team">Uptech</vendor>
+
+    <description><![CDATA[
+    An easy way to import fonts without renaming it directly from designers or font site if it contains symbols restricted by IDE.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.android</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="team.uptech.fontimporter.ImportSuccess"
+                           displayType="BALLOON"/>
+        <notificationGroup id="team.uptech.fontimporter.RemoveSuccess"
+                           displayType="BALLOON"/>
+        <notificationGroup id="team.uptech.fontimporter.ImportError"
+                           displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <group id="team.uptech.fontimporter.FontImporter"
+               text="Manage Fonts"
+               description="Tool for importing fonts in the Android Resources folder"
+               popup="true">
+
+            <action
+                    id="team.uptech.fontimporter.actions.FontImportAction"
+                    class="team.uptech.fontimporter.actions.FontImportAction"
+                    text="Import Fonts">
+            </action>
+
+            <action
+                    id="team.uptech.fontimporter.actions.FontDeleteAction"
+                    class="team.uptech.fontimporter.actions.FontDeleteAction"
+                    text="Delete Fonts">
+            </action>
+
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </group>
+    </actions>
+</idea-plugin>
