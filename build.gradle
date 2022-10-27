@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'team.uptech.fontimporter'
-version '1.0-alpha03'
+version '1.0-alpha04'
 
 repositories {
     maven {
@@ -20,7 +20,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version = '212.5712.43'
+    version = '213.7172.25'
     plugins = ['android']
 }
 
