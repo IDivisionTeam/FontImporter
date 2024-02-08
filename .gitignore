@@ -147,11 +147,10 @@ hs_err_pid*
 /.idea/codeStyles/codeStyleConfig.xml
 /.idea/compiler.xml
 
-src/main/kotlin/team/uptech/.DS_Store
-src/main/kotlin/team/uptech/fontimporter/.DS_Store
 ### macOS template
 # General
 .DS_Store
+**/.DS_Store
 .AppleDouble
 .LSOverride
 

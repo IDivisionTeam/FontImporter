@@ -1,7 +1,7 @@
 <idea-plugin>
-    <id>team.uptech.fontimporter.FontImporter</id>
+    <id>team.idivision.plugin.font_importer.FontImporter</id>
     <name>Font Importer</name>
-    <vendor email="yaroslav.ovdiienko@uptech.team" url="http://www.uptech.team">Uptech</vendor>
+    <vendor email="yaroslav.ovdiienko@gmail.com" url="https://github.com/IDivisionTeam">IDivision</vendor>
 
     <description><![CDATA[
     An easy way to import fonts without renaming it directly from designers or font site if it contains symbols restricted by IDE.
@@ -11,29 +11,29 @@
     <depends>org.jetbrains.android</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <notificationGroup id="team.uptech.fontimporter.ImportSuccess"
+        <notificationGroup id="team.idivision.plugin.font_importer.ImportSuccess"
                            displayType="BALLOON"/>
-        <notificationGroup id="team.uptech.fontimporter.RemoveSuccess"
+        <notificationGroup id="team.idivision.plugin.font_importer.RemoveSuccess"
                            displayType="BALLOON"/>
-        <notificationGroup id="team.uptech.fontimporter.ImportError"
+        <notificationGroup id="team.idivision.plugin.font_importer.ImportError"
                            displayType="BALLOON"/>
     </extensions>
 
     <actions>
-        <group id="team.uptech.fontimporter.FontImporter"
+        <group id="team.idivision.plugin.font_importer.FontImporter"
                text="Manage Fonts"
                description="Tool for importing fonts in the Android Resources folder"
                popup="true">
 
             <action
-                    id="team.uptech.fontimporter.actions.FontImportAction"
-                    class="team.uptech.fontimporter.actions.FontImportAction"
+                    id="team.idivision.plugin.font_importer.actions.FontImportAction"
+                    class="team.idivision.plugin.font_importer.actions.FontImportAction"
                     text="Import Fonts">
             </action>
 
             <action
-                    id="team.uptech.fontimporter.actions.FontDeleteAction"
-                    class="team.uptech.fontimporter.actions.FontDeleteAction"
+                    id="team.idivision.plugin.font_importer.actions.FontDeleteAction"
+                    class="team.idivision.plugin.font_importer.actions.FontDeleteAction"
                     text="Delete Fonts">
             </action>
 
