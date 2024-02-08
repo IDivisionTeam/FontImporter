@@ -79,7 +79,7 @@ class FileUtils(private val project: Project?) {
 
         val fileNameIndexesWithDuplicates = fileNames.mapIndexed { index, i -> i to index }
             .groupBy { it.first }
-            .map { it.value.map { it.second } }
+            .map { names -> names.value.map { it.second } }
 
         fileNameIndexesWithDuplicates.forEach { groupedFiles ->
             if (groupedFiles.size == 1) {

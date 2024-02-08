@@ -1,5 +1,6 @@
 package team.idivision.plugin.font_importer.actions
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import team.idivision.plugin.font_importer.actions.core.BaseAction
@@ -11,6 +12,8 @@ import team.idivision.plugin.font_importer.utils.files.ResourcesUtil
 
 
 class FontImportAction : BaseAction() {
+
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
     override fun actionPerformed(event: AnActionEvent) {
         val currentProject: Project? = event.project

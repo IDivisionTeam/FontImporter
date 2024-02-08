@@ -16,7 +16,7 @@ fun buildImportSuccessNotification(project: Project?, importedFontsCount: Int, r
     if (importedFontsCount > 0) {
         message = message.plus(
             Localization.getString("notification.message.fonts_imported", importedFontsCount)
-                .run { if (replacedFontsCount > 0) ", ${this.toLowerCase()}" else this })
+                .run { if (replacedFontsCount > 0) ", ${this.lowercase()}" else this })
     }
 
     val location = " ${Localization.getString("notification.message.part.in").plus(" $path")}"
@@ -26,13 +26,11 @@ fun buildImportSuccessNotification(project: Project?, importedFontsCount: Int, r
 }
 
 fun buildDeleteSuccessNotification(project: Project?, message: String) {
-
     NotificationGroupManager.getInstance().getNotificationGroup("team.idivision.plugin.font_importer.RemoveSuccess")
         .createNotification(message, NotificationType.INFORMATION).notify(project)
 }
 
 fun buildExceptionNotification(project: Project?, error: String) {
-
     NotificationGroupManager.getInstance().getNotificationGroup("team.idivision.plugin.font_importer.ImportError")
         .createNotification(error, NotificationType.ERROR).notify(project)
 }
