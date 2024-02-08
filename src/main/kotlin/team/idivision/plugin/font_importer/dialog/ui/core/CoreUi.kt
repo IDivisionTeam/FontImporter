@@ -1,7 +1,8 @@
 package team.idivision.plugin.font_importer.dialog.ui.core
 
-import com.intellij.ui.layout.LayoutBuilder
+import com.intellij.ui.dsl.builder.Panel
+
 
 interface CoreUi {
-    fun buildUi(layout: LayoutBuilder)
+    fun build(layout: Panel)
 }

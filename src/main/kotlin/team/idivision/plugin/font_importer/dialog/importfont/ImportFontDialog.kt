@@ -3,7 +3,7 @@ package team.idivision.plugin.font_importer.dialog.importfont
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
-import com.intellij.ui.layout.LayoutBuilder
+import com.intellij.ui.dsl.builder.Panel
 import team.idivision.plugin.font_importer.dialog.core.BaseDialog
 import team.idivision.plugin.font_importer.dialog.ui.FontsChooserRow
 import team.idivision.plugin.font_importer.dialog.ui.FontsTextArea
@@ -22,9 +22,9 @@ class ImportFontDialog(
     presenter: ImportFontAgreement.Presenter
 ) : BaseDialog<ImportFontAgreement.View, ImportFontAgreement.Presenter>(project, presenter), ImportFontAgreement.View {
 
-    private val moduleSelectionDropDown: DropDownUi = ModuleSelectionDropDown(presenter.getModuleDropDownItems())
-    private val fontsTextArea: TextAreaUi = FontsTextArea()
-    private val fontsChooserRow: CoreUi = FontsChooserRow { openFileChooserDialog() }
+    private lateinit var moduleSelectionDropDown: DropDownUi
+    private lateinit var fontsTextArea: TextAreaUi
+    private lateinit var fontsChooserRow: CoreUi
 
     init {
         title = Localization.getString("dialog.title.import")
@@ -37,10 +37,13 @@ class ImportFontDialog(
         presenter.bindView(this)
     }
 
-    override fun buildBody(layoutBuilder: LayoutBuilder) {
-        moduleSelectionDropDown.buildUi(layoutBuilder)
-        fontsTextArea.buildUi(layoutBuilder)
-        fontsChooserRow.buildUi(layoutBuilder)
+    override fun buildBody(layout: Panel) {
+        moduleSelectionDropDown = ModuleSelectionDropDown(presenter.getModuleDropDownItems())
+            .also { it.build(layout) }
+        fontsTextArea = FontsTextArea()
+            .also { it.build(layout) }
+        fontsChooserRow = FontsChooserRow { openFileChooserDialog() }
+            .also { it.build(layout) }
     }
 
     private fun openFileChooserDialog() {
@@ -51,6 +54,7 @@ class ImportFontDialog(
     }
 
     override fun updateDialogUi(fontsBeforeRenaming: String, fontsAfterRenaming: String) {
+        dialog.apply()
         fontsTextArea.setTexts(fontsBeforeRenaming, fontsAfterRenaming)
         isOKActionEnabled = true
     }
@@ -58,7 +62,7 @@ class ImportFontDialog(
     override fun doOKAction() {
         super.doOKAction()
         try {
-            val module = moduleSelectionDropDown.getDropDownSelectedItem() ?: ResourcesUtil.DEFAULT_MODULE
+            val module = moduleSelectionDropDown.getSelectedItem() ?: ResourcesUtil.DEFAULT_MODULE
             presenter.importSelectedFontToModule(module)
         } catch (error: IOException) {
             showError(project, error.message)
@@ -77,11 +81,6 @@ class ImportFontDialog(
         buildImportSuccessNotification(project, filesCount, replacedFilesCount, path)
     }
 
-    override fun dialogWidth(): Int {
-        return 800
-    }
-
-    override fun dialogHeight(): Int {
-        return 350
-    }
+    override fun dialogWidth(): Int = 800
+    override fun dialogHeight(): Int = 350
 }

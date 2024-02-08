@@ -41,9 +41,11 @@ class ImportFontPresenter(
             ResourcesStatus.NoResDir -> {
                 view?.showNoResFolderError(module)
             }
+
             ResourcesStatus.NoFontDir -> {
                 view?.showNoFontFolderError(module)
             }
+
             ResourcesStatus.Success -> {
                 fileUtils.copyFonts(resourcesUtil.fontDir, filesSelected) { path, filesCount, replacedFilesCount ->
                     view?.showImportSuccess(filesCount, replacedFilesCount, path)

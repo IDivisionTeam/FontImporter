@@ -1,30 +1,30 @@
 package team.idivision.plugin.font_importer.dialog.ui
 
-import com.intellij.ui.layout.CCFlags
-import com.intellij.ui.layout.LayoutBuilder
-import com.intellij.ui.layout.PropertyBinding
+import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.RightGap
+import com.intellij.ui.dsl.builder.bindItem
+import com.intellij.ui.dsl.builder.listCellRenderer
 import team.idivision.plugin.font_importer.dialog.ui.core.DropDownUi
 import team.idivision.plugin.font_importer.localization.Localization
 import javax.swing.DefaultComboBoxModel
 
 
 class ModuleSelectionDropDown(
-    private val items: Array<String>
+    private val items: Array<String>,
 ) : DropDownUi {
+    private var selectedItem: String? = items.firstOrNull()
 
-    private var selectedItem: String? = items.first()
+    override fun build(layout: Panel) {
+        layout.row {
+            label(Localization.getString("label.select_module"))
+                .gap(RightGap.SMALL)
 
-    private fun getModuleBinding() = PropertyBinding({ selectedItem }, { selectedItem = it })
-
-    override fun buildUi(layout: LayoutBuilder) {
-        layout.row(separated = true) {
-            cell(isFullWidth = true) {
-                label(Localization.getString("label.select_module"))
-                comboBox(DefaultComboBoxModel(items), getModuleBinding())
-                    .apply { constraints(CCFlags.growX) }
-            }
+            comboBox(
+                DefaultComboBoxModel(items),
+                listCellRenderer {},
+            ).bindItem(::selectedItem)
         }
     }
 
-    override fun getDropDownSelectedItem(): String? = selectedItem
+    override fun getSelectedItem(): String? = selectedItem
 }

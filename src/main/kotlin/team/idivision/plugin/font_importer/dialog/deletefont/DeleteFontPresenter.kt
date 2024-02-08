@@ -21,9 +21,11 @@ class DeleteFontPresenter(
             ResourcesStatus.NoResDir -> {
                 view?.showNoResFolderError(module)
             }
+
             ResourcesStatus.NoFontDir -> {
                 view?.showNoFontFolderError(module)
             }
+
             ResourcesStatus.Success -> {
                 if (!resourcesUtil.hasFonts()) {
                     view?.showEmptyFontFolderError(module)

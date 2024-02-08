@@ -1,9 +1,10 @@
 package team.idivision.plugin.font_importer.dialog.core
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.ui.layout.LayoutBuilder
-import com.intellij.ui.layout.panel
+import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.panel
 import team.idivision.plugin.font_importer.localization.Localization
 import team.idivision.plugin.font_importer.utils.buildExceptionNotification
 import java.awt.Dimension
@@ -14,11 +15,13 @@ abstract class BaseDialog<View : BaseAgreement.View, Presenter : BaseAgreement.P
     protected val project: Project?, protected val presenter: Presenter
 ) : DialogWrapper(project, true) {
 
+    protected lateinit var dialog: DialogPanel
+
     protected fun showError(project: Project?, message: String? = null) {
         buildExceptionNotification(project, message ?: Localization.getString("exception.message.unknown"))
     }
 
-    abstract fun buildBody(layoutBuilder: LayoutBuilder)
+    abstract fun buildBody(layout: Panel)
 
     override fun createCenterPanel(): JComponent {
         return panel { buildBody(this) }
@@ -28,6 +31,9 @@ abstract class BaseDialog<View : BaseAgreement.View, Presenter : BaseAgreement.P
                 }
 
                 preferredSize = Dimension(dialogWidth(), dialogHeight())
+            }
+            .also {
+                dialog = it
             }
     }
 

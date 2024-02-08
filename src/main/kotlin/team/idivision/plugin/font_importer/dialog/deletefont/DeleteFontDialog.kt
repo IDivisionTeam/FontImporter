@@ -1,7 +1,7 @@
 package team.idivision.plugin.font_importer.dialog.deletefont
 
 import com.intellij.openapi.project.Project
-import com.intellij.ui.layout.LayoutBuilder
+import com.intellij.ui.dsl.builder.Panel
 import team.idivision.plugin.font_importer.dialog.core.BaseDialog
 import team.idivision.plugin.font_importer.dialog.ui.DeleteFontsDropDown
 import team.idivision.plugin.font_importer.dialog.ui.core.DropDownUi
@@ -16,9 +16,7 @@ class DeleteFontDialog(
     presenter: DeleteFontAgreement.Presenter
 ) : BaseDialog<DeleteFontAgreement.View, DeleteFontAgreement.Presenter>(project, presenter), DeleteFontAgreement.View {
 
-    private val dropDownRow: DropDownUi = DeleteFontsDropDown(presenter.getModuleDropDownItems()) { selectedItem ->
-        isOKActionEnabled = !selectedItem.isNullOrBlank()
-    }
+    private lateinit var dropDownRow: DropDownUi
 
     init {
         title = Localization.getString("dialog.title.delete")
@@ -29,14 +27,16 @@ class DeleteFontDialog(
         presenter.bindView(this)
     }
 
-    override fun buildBody(layoutBuilder: LayoutBuilder) {
-        dropDownRow.buildUi(layoutBuilder)
+    override fun buildBody(layout: Panel) {
+        dropDownRow = DeleteFontsDropDown(presenter.getModuleDropDownItems()) { selectedItem ->
+            isOKActionEnabled = !selectedItem.isNullOrBlank()
+        }.also { it.build(layout) }
     }
 
     override fun doOKAction() {
         super.doOKAction()
         try {
-            val module = dropDownRow.getDropDownSelectedItem() ?: ResourcesUtil.DEFAULT_MODULE
+            val module = dropDownRow.getSelectedItem() ?: ResourcesUtil.DEFAULT_MODULE
             presenter.deleteFontsFromModule(module)
         } catch (error: IOException) {
             showError(project, error.message)
@@ -62,11 +62,6 @@ class DeleteFontDialog(
         )
     }
 
-    override fun dialogWidth(): Int {
-        return 500
-    }
-
-    override fun dialogHeight(): Int {
-        return 30
-    }
+    override fun dialogWidth(): Int = 500
+    override fun dialogHeight(): Int = 30
 }
