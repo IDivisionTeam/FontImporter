@@ -1,18 +1,18 @@
+// Extracts config data from `gradle.properties` file.
+fun properties(key: String) = providers.gradleProperty(key)
+
 plugins {
-    id("org.jetbrains.intellij") version "1.17.1"
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("java")
+    id("org.jetbrains.intellij") version ("1.17.1")
+    id("org.jetbrains.kotlin.jvm") version ("1.9.22")
 }
 
-group = "team.idivision.plugin.font_importer"
-version = "1.0-alpha05"
+group = properties("pluginGroup").get()
+version = properties("pluginVersion").get()
 
 repositories {
-    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    mavenCentral()
     gradlePluginPortal()
-}
-
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib")
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
