@@ -1,15 +1,11 @@
 package team.idivision.plugin.font_importer.dialog.ui
 
-import com.intellij.ui.dsl.builder.Panel
-import team.idivision.plugin.font_importer.dialog.ui.core.CoreUi
+import com.intellij.ui.dsl.builder.Cell
+import com.intellij.ui.dsl.builder.Row
 import team.idivision.plugin.font_importer.localization.Localization
+import javax.swing.JButton
 
 
-class FontsChooserRow(private val fileChooser: () -> Unit) : CoreUi {
-
-    override fun build(layout: Panel) {
-        layout.row {
-            button(Localization.getString("action.choose_fonts")) { fileChooser() }
-        }
-    }
-}
+fun Row.fileChooser(action: () -> Unit): Cell<JButton> =
+    button(Localization.getString("action.choose_fonts")) { action() }
+        .applyToComponent { isFocusable = false }

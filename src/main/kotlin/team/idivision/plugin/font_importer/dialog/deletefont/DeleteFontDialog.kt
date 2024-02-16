@@ -1,13 +1,13 @@
 package team.idivision.plugin.font_importer.dialog.deletefont
 
+import com.intellij.codeInspection.javaDoc.JavadocUIUtil.bindItem
 import com.intellij.openapi.project.Project
+import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.Panel
 import team.idivision.plugin.font_importer.dialog.core.BaseDialog
-import team.idivision.plugin.font_importer.dialog.ui.DeleteFontsDropDown
-import team.idivision.plugin.font_importer.dialog.ui.core.DropDownUi
+import team.idivision.plugin.font_importer.dialog.ui.dropDown
 import team.idivision.plugin.font_importer.localization.Localization
 import team.idivision.plugin.font_importer.utils.buildDeleteSuccessNotification
-import team.idivision.plugin.font_importer.utils.files.ResourcesUtil
 import java.io.IOException
 
 
@@ -16,31 +16,34 @@ class DeleteFontDialog(
     presenter: DeleteFontAgreement.Presenter
 ) : BaseDialog<DeleteFontAgreement.View, DeleteFontAgreement.Presenter>(project, presenter), DeleteFontAgreement.View {
 
-    private lateinit var dropDownRow: DropDownUi
-
     init {
         title = Localization.getString("dialog.title.delete")
         setOKButtonText(Localization.getString("action.delete"))
         setCancelButtonText(Localization.getString("action.cancel"))
-        isOKActionEnabled = false
         init()
         presenter.bindView(this)
     }
 
     override fun buildBody(layout: Panel) {
-        dropDownRow = DeleteFontsDropDown(presenter.getModuleDropDownItems()) { selectedItem ->
-            isOKActionEnabled = !selectedItem.isNullOrBlank()
-        }.also { it.build(layout) }
+        layout.apply {
+            row {
+                dropDown(
+                    label = Localization.getString("dialog.message.delete"),
+                    items = presenter.getModuleDropDownItems(),
+                )
+                    .align(Align.FILL)
+                    .bindItem(presenter.getState()::selectedModule)
+            }
+        }
     }
 
     override fun doOKAction() {
-        super.doOKAction()
         try {
-            val module = dropDownRow.getSelectedItem() ?: ResourcesUtil.DEFAULT_MODULE
-            presenter.deleteFontsFromModule(module)
+            presenter.deleteFontsFromModule()
         } catch (error: IOException) {
             showError(project, error.message)
         }
+        super.doOKAction()
     }
 
     override fun showNoResFolderError(module: String) {

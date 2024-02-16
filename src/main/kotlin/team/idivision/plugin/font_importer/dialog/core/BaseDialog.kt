@@ -5,9 +5,9 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.util.ui.JBDimension
 import team.idivision.plugin.font_importer.localization.Localization
 import team.idivision.plugin.font_importer.utils.buildExceptionNotification
-import java.awt.Dimension
 import javax.swing.JComponent
 
 
@@ -30,7 +30,7 @@ abstract class BaseDialog<View : BaseAgreement.View, Presenter : BaseAgreement.P
                     return this
                 }
 
-                preferredSize = Dimension(dialogWidth(), dialogHeight())
+                minimumSize = JBDimension(dialogWidth(), dialogHeight())
             }
             .also {
                 dialog = it

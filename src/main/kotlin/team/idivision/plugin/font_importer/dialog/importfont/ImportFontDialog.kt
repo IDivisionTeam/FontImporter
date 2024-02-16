@@ -1,72 +1,101 @@
 package team.idivision.plugin.font_importer.dialog.importfont
 
+import com.intellij.codeInspection.javaDoc.JavadocUIUtil.bindItem
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
-import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.components.JBTextArea
+import com.intellij.ui.dsl.builder.*
 import team.idivision.plugin.font_importer.dialog.core.BaseDialog
-import team.idivision.plugin.font_importer.dialog.ui.FontsChooserRow
-import team.idivision.plugin.font_importer.dialog.ui.FontsTextArea
-import team.idivision.plugin.font_importer.dialog.ui.ModuleSelectionDropDown
-import team.idivision.plugin.font_importer.dialog.ui.core.CoreUi
-import team.idivision.plugin.font_importer.dialog.ui.core.DropDownUi
-import team.idivision.plugin.font_importer.dialog.ui.core.TextAreaUi
+import team.idivision.plugin.font_importer.dialog.ui.dropDown
+import team.idivision.plugin.font_importer.dialog.ui.fileChooser
+import team.idivision.plugin.font_importer.dialog.ui.readOnlyTextArea
 import team.idivision.plugin.font_importer.localization.Localization
 import team.idivision.plugin.font_importer.utils.buildImportSuccessNotification
-import team.idivision.plugin.font_importer.utils.files.ResourcesUtil
 import java.io.IOException
 
 
 class ImportFontDialog(
     project: Project?,
-    presenter: ImportFontAgreement.Presenter
+    presenter: ImportFontAgreement.Presenter,
 ) : BaseDialog<ImportFontAgreement.View, ImportFontAgreement.Presenter>(project, presenter), ImportFontAgreement.View {
 
-    private lateinit var moduleSelectionDropDown: DropDownUi
-    private lateinit var fontsTextArea: TextAreaUi
-    private lateinit var fontsChooserRow: CoreUi
+    private var selectedFontsField: Cell<JBTextArea>? = null
+    private var formattedFontsField: Cell<JBTextArea>? = null
 
     init {
         title = Localization.getString("dialog.title.import")
         setOKButtonText(Localization.getString("action.import"))
         setCancelButtonText(Localization.getString("action.cancel"))
 
-        isOKActionEnabled = false
+        toggleActionButtonState(isEnabled = false)
         init()
 
         presenter.bindView(this)
     }
 
     override fun buildBody(layout: Panel) {
-        moduleSelectionDropDown = ModuleSelectionDropDown(presenter.getModuleDropDownItems())
-            .also { it.build(layout) }
-        fontsTextArea = FontsTextArea()
-            .also { it.build(layout) }
-        fontsChooserRow = FontsChooserRow { openFileChooserDialog() }
-            .also { it.build(layout) }
+        layout.apply {
+            rowsRange {
+                row {
+                    dropDown(
+                        label = Localization.getString("label.select_module"),
+                        items = presenter.getModuleDropDownItems(),
+                    )
+                        .align(Align.FILL)
+                        .bindItem(presenter.getState()::selectedModule)
+                }
+                    .bottomGap(BottomGap.MEDIUM)
+
+                row {
+                    fileChooser { openFileChooserDialog() }
+                }
+                    .bottomGap(BottomGap.SMALL)
+
+                row {
+                    readOnlyTextArea(
+                        label = Localization.getString("label.selected_fonts"),
+                    )
+                        .align(AlignX.FILL)
+                        .also { selectedFontsField = it }
+                }
+                row {
+                    readOnlyTextArea(
+                        label = Localization.getString("label.formatted_fonts"),
+                    )
+                        .align(AlignX.FILL)
+                        .also { formattedFontsField = it }
+                }
+            }
+        }
     }
 
     private fun openFileChooserDialog() {
         val descriptor = FileChooserDescriptorFactory.createMultipleFilesNoJarsDescriptor()
+
         FileChooser.chooseFiles(descriptor, project, null) { selectedFonts ->
             presenter.saveSelectedFonts(selectedFonts)
         }
     }
 
-    override fun updateDialogUi(fontsBeforeRenaming: String, fontsAfterRenaming: String) {
-        dialog.apply()
-        fontsTextArea.setTexts(fontsBeforeRenaming, fontsAfterRenaming)
-        isOKActionEnabled = true
+    override fun updateTextFields() {
+        val state = presenter.getState()
+
+        selectedFontsField?.text(state.selectedFonts)
+        formattedFontsField?.text(state.formattedFonts)
+    }
+
+    override fun toggleActionButtonState(isEnabled: Boolean) {
+        isOKActionEnabled = isEnabled
     }
 
     override fun doOKAction() {
-        super.doOKAction()
         try {
-            val module = moduleSelectionDropDown.getSelectedItem() ?: ResourcesUtil.DEFAULT_MODULE
-            presenter.importSelectedFontToModule(module)
+            presenter.importSelectedFontToModule()
         } catch (error: IOException) {
             showError(project, error.message)
         }
+        super.doOKAction()
     }
 
     override fun showNoResFolderError(module: String) {

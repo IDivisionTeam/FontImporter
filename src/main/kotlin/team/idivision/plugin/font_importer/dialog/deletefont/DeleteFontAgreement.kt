@@ -12,7 +12,9 @@ interface DeleteFontAgreement {
     }
 
     interface Presenter : BaseAgreement.Presenter<View> {
+        fun getState(): DeleteFontsState
+
         fun getModuleDropDownItems(): Array<String>
-        fun deleteFontsFromModule(module: String)
+        fun deleteFontsFromModule()
     }
 }

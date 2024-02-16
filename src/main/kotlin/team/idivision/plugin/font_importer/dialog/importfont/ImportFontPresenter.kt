@@ -1,56 +1,59 @@
 package team.idivision.plugin.font_importer.dialog.importfont
 
 import com.intellij.openapi.vfs.VirtualFile
+import team.idivision.plugin.font_importer.data.DEFAULT_MODULE_NAME
+import team.idivision.plugin.font_importer.data.FileManager
 import team.idivision.plugin.font_importer.dialog.core.BasePresenter
 import team.idivision.plugin.font_importer.utils.files.FileUtils
-import team.idivision.plugin.font_importer.utils.files.ResourcesStatus
-import team.idivision.plugin.font_importer.utils.files.ResourcesUtil
 
 
 class ImportFontPresenter(
     private val fileUtils: FileUtils,
-    private val resourcesUtil: ResourcesUtil
+    private val fileManager: FileManager,
 ) : BasePresenter<ImportFontAgreement.View>(), ImportFontAgreement.Presenter {
-
     private val filesSelected: MutableList<VirtualFile> = mutableListOf()
+    private val state: ImportFontState = ImportFontState()
 
-    override fun getModuleDropDownItems(): Array<String> {
-        return resourcesUtil.getAvailableModuleNames().toTypedArray()
-    }
+    override fun getState(): ImportFontState = state
 
-    private fun getSelectedFiles(): String {
-        return filesSelected.joinToString(
-            separator = SEPARATOR,
-            transform = { font -> font.nameWithoutExtension }
-        )
-    }
+    override fun getModuleDropDownItems(): Array<String> =
+        fileManager.getAvailableModuleNames()
 
-    private fun getRenamedSelectedFiles(): String {
-        return fileUtils.cleanFileNames(filesSelected).joinToString(SEPARATOR)
-    }
+    private fun getSelectedFiles(): String = filesSelected.joinToString(
+        separator = SEPARATOR,
+        transform = { font -> font.nameWithoutExtension },
+    )
+
+    private fun getRenamedSelectedFiles(): String =
+        fileUtils.cleanFileNames(filesSelected).joinToString(SEPARATOR)
 
     override fun saveSelectedFonts(selectedFonts: List<VirtualFile>) {
         if (filesSelected.isNotEmpty()) filesSelected.clear()
         filesSelected.addAll(selectedFonts)
 
-        view?.updateDialogUi(getSelectedFiles(), getRenamedSelectedFiles())
+        state.selectedFonts = getSelectedFiles()
+        state.formattedFonts = getRenamedSelectedFiles()
+
+        view?.updateTextFields()
+        view?.toggleActionButtonState(isEnabled = true)
     }
 
-    override fun importSelectedFontToModule(module: String) {
-        when (resourcesUtil.createAndGetFontDir(module)) {
-            ResourcesStatus.NoResDir -> {
-                view?.showNoResFolderError(module)
-            }
+    override fun importSelectedFontToModule() {
+        val module = getState().selectedModule
 
-            ResourcesStatus.NoFontDir -> {
-                view?.showNoFontFolderError(module)
-            }
+        if (!fileManager.hasResourcesDir(module)) {
+            fileManager.createResDir(module)
+        }
 
-            ResourcesStatus.Success -> {
-                fileUtils.copyFonts(resourcesUtil.fontDir, filesSelected) { path, filesCount, replacedFilesCount ->
-                    view?.showImportSuccess(filesCount, replacedFilesCount, path)
-                }
-            }
+        if (!fileManager.hasFontDir(module)) {
+            fileManager.createFontDir(module)
+        }
+
+        fileUtils.copyFonts(
+            fileManager.findFontDir(module),
+            filesSelected
+        ) { path, filesCount, replacedFilesCount ->
+            view?.showImportSuccess(filesCount, replacedFilesCount, path)
         }
     }
 
@@ -58,3 +61,9 @@ class ImportFontPresenter(
         private const val SEPARATOR = "\n"
     }
 }
+
+data class ImportFontState(
+    var selectedModule: String = DEFAULT_MODULE_NAME,
+    var selectedFonts: String = "",
+    var formattedFonts: String = "",
+)

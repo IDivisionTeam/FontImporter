@@ -4,11 +4,11 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import team.idivision.plugin.font_importer.actions.core.BaseAction
+import team.idivision.plugin.font_importer.data.AndroidFileManager
 import team.idivision.plugin.font_importer.dialog.deletefont.DeleteFontAgreement
 import team.idivision.plugin.font_importer.dialog.deletefont.DeleteFontDialog
 import team.idivision.plugin.font_importer.dialog.deletefont.DeleteFontPresenter
 import team.idivision.plugin.font_importer.utils.files.FileUtils
-import team.idivision.plugin.font_importer.utils.files.ResourcesUtil
 
 
 class FontDeleteAction : BaseAction() {
@@ -24,7 +24,7 @@ class FontDeleteAction : BaseAction() {
 
     private fun initPresenter(project: Project?): DeleteFontAgreement.Presenter {
         val fileUtils = FileUtils(project)
-        val resUtils = ResourcesUtil(project)
-        return DeleteFontPresenter(fileUtils, resUtils)
+        val fileManager = AndroidFileManager(project)
+        return DeleteFontPresenter(fileUtils, fileManager)
     }
 }
