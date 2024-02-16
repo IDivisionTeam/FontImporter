@@ -9,9 +9,9 @@ import java.io.IOException
 
 
 class FileUtils(private val project: Project?) {
-    private val unnecessarySymbolsRegex: Regex = ("[^a-z_]").toRegex()
+    private val forbiddenSymbolsRegex: Regex = ("[^a-z_]").toRegex()
     private val humpsRegex = ("(?<=.)(?=\\p{Upper})").toRegex()
-    private val underscoreRegex = ("_{2,}").toRegex()
+    private val multipleUnderscoresRegex = ("_{2,}").toRegex()
 
     @Throws(IOException::class, NullPointerException::class)
     fun copyFonts(
@@ -19,22 +19,33 @@ class FileUtils(private val project: Project?) {
         selectedFonts: List<VirtualFile>,
         successListener: (path: String, filesCount: Int, replacedFilesCount: Int) -> Unit
     ) {
-        if (newParent == null) throw NullPointerException(Localization.getString("exception.message.new_path_null"))
+        checkNotNull(newParent) {
+            NullPointerException(Localization.getString("exception.message.new_path_null"))
+        }
 
         val cleanFileNames = cleanFileNames(selectedFonts)
+        val existingFonts = newParent.children.associateBy { it.nameWithoutExtension }
 
         var importedFontsCount = 0
         var replacedFontsCount = 0
-        selectedFonts.forEachIndexed { index, file ->
+
+        for (index in selectedFonts.indices) {
+            val selectedFontFile = selectedFonts[index]
             val newName = cleanFileNames[index]
+            val existingFontFile = existingFonts[newName]
 
             WriteCommandAction.runWriteCommandAction(project) {
-                newParent.children.firstOrNull { it.nameWithoutExtension == newName }?.delete(this)?.also {
+                if (existingFontFile != null) {
+                    existingFontFile.delete(this)
                     replacedFontsCount++
                     importedFontsCount--
                 }
 
-                file.copy(this, newParent, "$newName.${file.extension}")
+                selectedFontFile.copy(
+                    this,
+                    newParent,
+                    "$newName.${selectedFontFile.extension}",
+                )
             }
             importedFontsCount++
         }
@@ -47,7 +58,9 @@ class FileUtils(private val project: Project?) {
         parent: VirtualFile?,
         successListener: (path: String, filesCount: Int) -> Unit
     ) {
-        if (parent == null) throw NullPointerException(Localization.getString("exception.message.parent_path_null"))
+        checkNotNull(parent) {
+            NullPointerException(Localization.getString("exception.message.parent_path_null"))
+        }
 
         val filesCount = parent.children.size
         WriteCommandAction.runWriteCommandAction(project) {
@@ -58,44 +71,42 @@ class FileUtils(private val project: Project?) {
     }
 
     fun cleanFileNames(files: List<VirtualFile>): List<String> {
-        val newFileNames = mutableListOf<String>()
+        val cleanNames = mutableListOf<String>()
+            .apply {
+                files.forEach { file ->
+                    val replaceDashes = file.nameWithoutExtension.replace("-", "_").toSnakeCase()
+                    val replaceSymbols = replaceDashes.replace(forbiddenSymbolsRegex, "")
+                    val cleanName = replaceSymbols.replace(multipleUnderscoresRegex, "_")
 
-        files.forEach { file ->
-            val replaceDash = file.nameWithoutExtension.replace("-", "_").toSnakeCase()
-            val replaceSymbols = replaceDash.replace(unnecessarySymbolsRegex, "")
-            val cleanName = replaceSymbols.replace(underscoreRegex, "_")
+                    add(cleanName)
+                }
+            }
 
-            newFileNames.add(cleanName)
-        }
-
-        return fixFileNameDuplicates(newFileNames).toList()
+        return enumerateDuplicates(cleanNames)
     }
 
-    private fun fixFileNameDuplicates(fileNames: List<String>): List<String> {
-        val hasDuplicates = fileNames.distinct().count() != fileNames.size
-        if (!hasDuplicates) return fileNames
+    private fun enumerateDuplicates(fileNames: List<String>): List<String> {
+        val sortedNames = fileNames.sorted().toMutableList()
+        var previous = sortedNames.first()
+        var counter = 0
 
-        val fixedFileNames = fileNames.toMutableList()
+        for (index in sortedNames.indices) {
+            val current = sortedNames[index]
 
-        val fileNameIndexesWithDuplicates = fileNames.mapIndexed { index, i -> i to index }
-            .groupBy { it.first }
-            .map { names -> names.value.map { it.second } }
-
-        fileNameIndexesWithDuplicates.forEach { groupedFiles ->
-            if (groupedFiles.size == 1) {
-                fixedFileNames[groupedFiles.first()] = fileNames[groupedFiles.first()]
-                return@forEach
+            if (current == previous) {
+                counter++
+            } else {
+                counter = 0
             }
 
-            var fileIndex = 1
-            fixedFileNames[groupedFiles.first()] = fileNames[groupedFiles.first()]
-            groupedFiles.drop(1).forEach { index ->
-                fixedFileNames[index] = "${fileNames[index]}$fileIndex"
-                fileIndex++
+            if (counter > 1) {
+                sortedNames[index] = "$current${counter - 1}"
             }
+
+            previous = current
         }
 
-        return fixedFileNames.toList()
+        return sortedNames
     }
 
     private fun String.toSnakeCase() = replace(humpsRegex, "_").lowercase()
