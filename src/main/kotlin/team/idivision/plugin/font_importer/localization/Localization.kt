@@ -1,17 +1,21 @@
 package team.idivision.plugin.font_importer.localization
 
+import com.intellij.DynamicBundle
+import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
-import java.text.MessageFormat
-import java.util.*
 
 
-object Localization {
-    private val bundle = ResourceBundle.getBundle("strings")
+@NonNls
+private const val BUNDLE = "strings.strings"
 
-    fun getString(@PropertyKey(resourceBundle = "strings") key: String, vararg params: Any): String {
-        val value = bundle.getString(key)
+object Localization : DynamicBundle(BUNDLE) {
 
-        if (params.isEmpty()) return value
-        return MessageFormat.format(value, *params)
-    }
+    @JvmStatic
+    fun getString(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =
+        getMessage(key, *params)
+
+    @Suppress("unused")
+    @JvmStatic
+    fun stringPointer(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =
+        getLazyMessage(key, *params)
 }
